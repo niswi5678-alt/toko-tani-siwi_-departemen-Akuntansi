@@ -1,0 +1,53 @@
+name: Deploy frontend to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Prepare website files
+        run: |
+          mkdir -p _site
+
+          if [ -f "front end/index.html" ]; then
+            cp -R "front end/." _site/
+          elif [ -f "index.html" ] && [ -f "style.css" ] && [ -f "config.js" ]; then
+            mkdir -p _site/css _site/javascript
+            cp index.html _site/index.html
+            cp style.css _site/css/style.css
+            cp config.js supplier.js produk.js transaksiMasuk.js transaksiKeluar.js ringkasan.js _site/javascript/
+          else
+            echo "Frontend files were not found in the expected project folders or repository root." >&2
+            exit 1
+          fi
+
+          test -f _site/index.html
+          test -f _site/css/style.css
+          test -f _site/javascript/config.js
+      - name: Upload frontend artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

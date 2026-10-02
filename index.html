@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Persediaan Toko Tani Siwi Maju</title>
+    <link rel="stylesheet" href="css/style.css" onerror="this.onerror=null; this.href='style.css';" />
+  </head>
+  <body>
+    <header>
+      <h1>🌱 Sistem Persediaan Toko Tani Siwi Maju</h1>
+    </header>
+
+    <div class="tabs">
+      <button class="active" data-tab="ringkasan">Ringkasan</button>
+      <button data-tab="supplier">Supplier</button>
+      <button data-tab="produk">Produk</button>
+      <button data-tab="masuk">Transaksi Masuk</button>
+      <button data-tab="keluar">Transaksi Keluar</button>
+    </div>
+
+    <section id="panel-ringkasan" class="panel active dashboard-panel">
+      <div class="section-top">
+        <div>
+          <p class="eyebrow">IKHTISAR TOKO</p>
+          <h2>Ringkasan persediaan</h2>
+          <p class="section-description">Pantau stok dan pergerakan uang dari transaksi barang.</p>
+        </div>
+        <label class="period-control" for="ringkasan-periode">
+          Periode
+          <select id="ringkasan-periode">
+            <option value="all">Semua waktu</option>
+            <option value="month">Bulan ini</option>
+            <option value="year">Tahun ini</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="cash-summary">
+        <div class="cash-summary-main">
+          <p class="eyebrow">ARUS KAS BERSIH</p>
+          <p class="cash-amount" id="ringkasan-bersih">Rp 0</p>
+          <p class="cash-caption" id="ringkasan-keterangan">Menghitung transaksi...</p>
+        </div>
+        <div class="cash-flow-visual" aria-label="Perbandingan kas masuk dan kas keluar">
+          <div class="flow-line">
+            <span>Kas masuk</span>
+            <strong id="ringkasan-masuk-label">Rp 0</strong>
+          </div>
+          <div class="flow-track"><span id="ringkasan-masuk-bar"></span></div>
+          <div class="flow-line">
+            <span>Kas keluar</span>
+            <strong id="ringkasan-keluar-label">Rp 0</strong>
+          </div>
+          <div class="flow-track flow-track-out"><span id="ringkasan-keluar-bar"></span></div>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card metric-in">
+          <span class="metric-label">Kas masuk · Penjualan</span>
+          <strong id="ringkasan-masuk">Rp 0</strong>
+          <span class="metric-note">Dari transaksi barang keluar</span>
+        </article>
+        <article class="metric-card metric-out">
+          <span class="metric-label">Kas keluar · Pembelian stok</span>
+          <strong id="ringkasan-keluar">Rp 0</strong>
+          <span class="metric-note">Dari transaksi barang masuk</span>
+        </article>
+        <article class="metric-card metric-stock">
+          <span class="metric-label">Jumlah persediaan</span>
+          <strong id="ringkasan-stok">0</strong>
+          <span class="metric-note">Total unit dari semua produk</span>
+        </article>
+        <article class="metric-card metric-alert">
+          <span class="metric-label">Produk perlu dicek</span>
+          <strong id="ringkasan-stok-rendah">0</strong>
+          <span class="metric-note">Stok 5 unit atau kurang</span>
+        </article>
+      </div>
+
+      <div class="summary-lower">
+        <section class="summary-block">
+          <div class="block-heading">
+            <div>
+              <p class="eyebrow">AKTIVITAS TERBARU</p>
+              <h3>Arus kas</h3>
+            </div>
+            <span class="small-note">Maks. 8 transaksi</span>
+          </div>
+          <div class="table-wrap">
+            <table class="activity-table">
+              <thead>
+                <tr><th>Tanggal</th><th>Jenis</th><th>Produk</th><th>Nilai</th></tr>
+              </thead>
+              <tbody id="tbody-ringkasan"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="summary-note">
+          <p class="eyebrow">CARA BACA</p>
+          <h3>Penjualan menambah kas</h3>
+          <p>Total transaksi keluar dihitung sebagai kas masuk penjualan. Total transaksi masuk dihitung sebagai kas keluar pembelian stok.</p>
+          <p class="note-foot">Ini ringkasan arus transaksi, bukan saldo kas aktual. Saldo awal, utang/piutang, dan biaya lain belum termasuk.</p>
+          <div class="entity-counts">
+            <div><span>Supplier</span><strong id="ringkasan-supplier">0</strong></div>
+            <div><span>Produk</span><strong id="ringkasan-produk">0</strong></div>
+          </div>
+        </aside>
+      </div>
+      <div class="status" id="status-ringkasan" role="status" aria-live="polite"></div>
+    </section>
+
+    <section id="panel-supplier" class="panel">
+      <h2>Data Supplier</h2>
+      <div class="form-grid">
+        <input type="hidden" id="supplier-id" />
+        <input type="text" id="supplier-nama" placeholder="Nama Supplier" />
+        <input type="text" id="supplier-telepon" placeholder="Telepon" />
+        <input type="text" id="supplier-alamat" placeholder="Alamat" />
+      </div>
+      <div class="action-row">
+        <button class="btn-primary" onclick="simpanSupplier()">Simpan</button>
+        <button class="btn-secondary" onclick="resetSupplier()">Reset</button>
+      </div>
+      <div class="status" id="status-supplier"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>Telepon</th>
+            <th>Alamat</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-supplier"></tbody>
+      </table>
+    </section>
+
+    <section id="panel-produk" class="panel">
+      <h2>Data Produk</h2>
+      <div class="form-grid">
+        <input type="hidden" id="produk-id" />
+        <input type="text" id="produk-kode" placeholder="Kode Produk" />
+        <input type="text" id="produk-nama" placeholder="Nama Produk" />
+        <select id="produk-supplier"></select>
+        <input type="text" id="produk-kategori" placeholder="Kategori" />
+        <input type="text" id="produk-satuan" placeholder="Satuan (kg, pack, dus)" />
+        <input type="number" id="produk-harga-beli" placeholder="Harga Beli" min="0" step="100" />
+        <input type="number" id="produk-harga-jual" placeholder="Harga Jual" min="0" step="100" />
+        <input type="number" id="produk-stok" placeholder="Stok Awal" min="0" step="1" />
+      </div>
+      <div class="action-row">
+        <button class="btn-primary" onclick="simpanProduk()">Simpan</button>
+        <button class="btn-secondary" onclick="resetProduk()">Reset</button>
+      </div>
+      <div class="status" id="status-produk"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Supplier</th>
+            <th>Kategori</th>
+            <th>Harga Beli</th>
+            <th>Harga Jual</th>
+            <th>Stok</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-produk"></tbody>
+      </table>
+    </section>
+
+    <section id="panel-masuk" class="panel">
+      <h2>Transaksi Masuk</h2>
+      <div class="form-grid">
+        <select id="masuk-produk"></select>
+        <input type="date" id="masuk-tanggal" />
+        <input type="number" id="masuk-jumlah" placeholder="Jumlah" min="1" step="1" />
+        <input type="number" id="masuk-harga-beli" placeholder="Harga Beli" min="0" step="100" />
+      </div>
+      <div class="action-row">
+        <button class="btn-primary" onclick="simpanTransaksiMasuk()">Simpan</button>
+        <button class="btn-secondary" onclick="resetTransaksiMasuk()">Reset</button>
+      </div>
+      <div class="status" id="status-masuk"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Produk</th>
+            <th>Tanggal</th>
+            <th>Jumlah</th>
+            <th>Harga Beli</th>
+            <th>Total</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-masuk"></tbody>
+      </table>
+    </section>
+
+    <section id="panel-keluar" class="panel">
+      <h2>Transaksi Keluar</h2>
+      <div class="form-grid">
+        <select id="keluar-produk"></select>
+        <input type="date" id="keluar-tanggal" />
+        <input type="number" id="keluar-jumlah" placeholder="Jumlah" min="1" step="1" />
+        <input type="number" id="keluar-harga-jual" placeholder="Harga Jual" min="0" step="100" />
+      </div>
+      <div class="action-row">
+        <button class="btn-primary" onclick="simpanTransaksiKeluar()">Simpan</button>
+        <button class="btn-secondary" onclick="resetTransaksiKeluar()">Reset</button>
+      </div>
+      <div class="status" id="status-keluar"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Produk</th>
+            <th>Tanggal</th>
+            <th>Jumlah</th>
+            <th>Harga Jual</th>
+            <th>Total</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-keluar"></tbody>
+      </table>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const scriptsReady = (async () => {
+        const scripts = [
+          ['config.js', 'javascript/config.js'],
+          ['supplier.js', 'javascript/supplier.js'],
+          ['produk.js', 'javascript/produk.js'],
+          ['transaksiMasuk.js', 'javascript/transaksiMasuk.js'],
+          ['transaksiKeluar.js', 'javascript/transaksiKeluar.js'],
+          ['ringkasan.js', 'javascript/ringkasan.js']
+        ];
+
+        for (const paths of scripts) {
+          let loaded = false;
+
+          for (const path of paths) {
+            const success = await new Promise((resolve) => {
+              const script = document.createElement('script');
+              script.src = path;
+              script.async = false;
+              script.onload = () => resolve(true);
+              script.onerror = () => {
+                script.remove();
+                resolve(false);
+              };
+              document.head.appendChild(script);
+            });
+
+            if (success) {
+              loaded = true;
+              break;
+            }
+          }
+
+          if (!loaded) {
+            throw new Error('File script tidak ditemukan: ' + paths[0]);
+          }
+        }
+      })();
+    </script>
+
+    <script>
+      document.querySelectorAll('.tabs button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tabs button').forEach((b) => b.classList.remove('active'));
+          document.querySelectorAll('.panel').forEach((panel) => panel.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+        });
+      });
+
+      document.getElementById('masuk-tanggal').value = new Date().toISOString().split('T')[0];
+      document.getElementById('keluar-tanggal').value = new Date().toISOString().split('T')[0];
+
+      const mulaiAplikasi = async () => {
+        try {
+          await scriptsReady;
+          await loadSupplier();
+          await loadProduk();
+          await isiProdukDropdown();
+          await loadTransaksiMasuk();
+          await loadTransaksiKeluar();
+          pasangFilterRingkasan();
+          await loadRingkasan();
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : String(error);
+          document.querySelectorAll('.status').forEach((status) => {
+            status.textContent = 'Aplikasi gagal memuat data: ' + detail;
+          });
+          console.error('Gagal menginisialisasi aplikasi:', error);
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mulaiAplikasi, { once: true });
+      } else {
+        mulaiAplikasi();
+      }
+    </script>
+  </body>
+</html>
